@@ -61,9 +61,62 @@ class NeuralNetwork():
 
         return accuracy
 
+    def give_prediction(self, json):
+        df = pd.read_csv('classified_quiz_examples.csv', header=None)
+        df.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8',
+                      'Answer_9', 'Answer_10', 'Result']
+        classify = self.classification(df, 'classified')
+
+        # Define X and y
+        x = classify['Answer_1'].astype(str)
+        y = classify['Result']
+
+        # Split data 80% for training 20% for testing.
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=True)
+        tfidf = TfidfVectorizer(smooth_idf=False, sublinear_tf=False, norm=None, analyzer='word', stop_words='english')
+        x_train = tfidf.fit_transform(x_train)
+        x = tfidf.transform(x)
+        x_test = tfidf.transform(x_test)
+        train_names = tfidf.get_feature_names_out()
+
+        # Printing the tf-idf weights for n-grams in a random example.
+        scores = pd.DataFrame()
+        doc = 0
+        feature_index = x_train[doc, :].nonzero()[1]
+        tfidf_scores = zip(feature_index, [x_train[doc, index] for index in feature_index])
+
+        # Tuples for scores and words in the randomly selected example
+        tuples = [(train_names[index], score) for (index, score) in tfidf_scores]
+        scores = scores.from_records(tuples, columns=['Words', 'Scores'])
+
+        # scores in order
+        scores = scores.sort_values(by=['Scores'], ascending=False)
+        model = LinearSVC().fit(x_train, y_train)
+
+        quiz = pd.DataFrame(json, index=[0])
+        unclassified = self.classification(quiz, 'unclassified')
+        x_new = tfidf.transform(unclassified['Answer_1'])
+        unclassified['Result'] = model.predict(x_new)
+        unclassified.dropna()
+
+        return unclassified
+
+
 
 if __name__ == '__main__':
     neural_network = NeuralNetwork()
+    json = {
+        "Answer_1": "A organized person",
+        "Answer_2": "Observations",
+        "Answer_3": "Diagram",
+        "Answer_4": "Conferences",
+        "Answer_5": "I am able to retain what people have told me for some time.",
+        "Answer_6": "I have a good imagination",
+        "Answer_7": "Reading a book",
+        "Answer_8": "Tables",
+        "Answer_9": "I agree",
+        "Answer_10": "Coordinate work for others"
+    }
     """print("Random synaptic weights: ")
     print(neural_network.synaptic_weights)
 
@@ -128,6 +181,10 @@ if __name__ == '__main__':
     unclassified['Result'] = model.predict(x_new)
     unclassified.dropna()
     print(unclassified.head())
+
+    print(neural_network.give_prediction(json))
+
+
 
 
 
