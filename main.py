@@ -1,13 +1,9 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.svm import LinearSVC, SVC
+from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import metrics
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, hamming_loss
-from sklearn.metrics import classification_report
-
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, hamming_loss
 
 class NeuralNetwork():
 
@@ -121,6 +117,18 @@ if __name__ == '__main__':
     model = LinearSVC().fit(x_train, y_train)
     predictions = model.predict(x_test)
     neural_network.metrics(y_test, predictions)
+
+    quiz = pd.read_csv('unclassified_quiz_examples.csv', header=None)
+    quiz.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8', 'Answer_9', 'Answer_10']
+    unclassified = neural_network.classification(quiz, 'unclassified')
+    print(unclassified.head())
+
+    x_new = tfidf.transform(unclassified['Answer_1'])
+    unclassified.shape
+    unclassified['Result'] = model.predict(x_new)
+    unclassified.dropna()
+    print(unclassified.head())
+
 
 
 
