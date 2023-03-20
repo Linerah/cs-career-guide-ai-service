@@ -1,5 +1,12 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.svm import LinearSVC, SVC
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn import metrics
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, hamming_loss
+from sklearn.metrics import classification_report
 
 
 class NeuralNetwork():
@@ -43,6 +50,21 @@ class NeuralNetwork():
             classify['Answer_1'] = classify['Answer_1'] + ' ' + classify['Answer_2'] + ' ' + classify['Answer_3'] + ' ' + classify['Answer_4'] + ' ' + classify['Answer_5'] + ' ' + classify['Answer_6'] + ' ' + classify['Answer_7'] + ' ' + classify['Answer_8'] + ' ' + classify['Answer_9'] + ' ' + classify['Answer_10']
             return classify
 
+    def metrics(self, test_labels, predictions):
+        accuracy = accuracy_score(test_labels, predictions)
+        macro_precision = precision_score(test_labels, predictions, average='macro')
+        macro_recall = recall_score(test_labels, predictions, average='macro')
+        macro_f1 = f1_score(test_labels, predictions, average='macro')
+        micro_precision = precision_score(test_labels, predictions, average='micro')
+        micro_recall = recall_score(test_labels, predictions, average='micro')
+        micro_f1 = f1_score(test_labels, predictions, average='micro')
+        ceLoss = hamming_loss(test_labels, predictions)
+        print("SVC Model Metrics ")
+        print("Accuracy: {:.4f}\nHamming Loss: {:.4f}\nPrecision:\n  - Macro: {:.4f}\n  - Micro: {:.4f}\nRecall:\n  - Macro: {:.4f}\n  - Micro: {:.4f}\nF1-measure:\n  - Macro: {:.4f}\n  - Micro: {:.4f}" \
+        .format(accuracy, ceLoss, macro_precision, micro_precision, macro_recall, micro_recall, macro_f1, micro_f1))
+
+        return accuracy
+
 
 if __name__ == '__main__':
     neural_network = NeuralNetwork()
@@ -68,6 +90,37 @@ if __name__ == '__main__':
                   'Answer_9', 'Answer_10', 'Result']
     classify = neural_network.classification(df, 'classified')
     print(classify.head())
+
+    # Define X and y
+    x = classify['Answer_1'].astype(str)
+    y = classify['Result']
+
+    # Split data 80% for training 20% for testing.
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=True)
+
+    tfidf = TfidfVectorizer(smooth_idf=False, sublinear_tf=False, norm=None, analyzer='word', stop_words='english')
+    x_train = tfidf.fit_transform(x_train)
+    x = tfidf.transform(x)
+    x_test = tfidf.transform(x_test)
+    train_names = tfidf.get_feature_names_out()
+
+    # Printing the tf-idf weights for n-grams in a random example.
+    scores = pd.DataFrame()
+    doc = 0
+    feature_index = x_train[doc, :].nonzero()[1]
+    tfidf_scores = zip(feature_index, [x_train[doc, index] for index in feature_index])
+
+    # Tuples for scores and words in the randomly selected example
+    tuples = [(train_names[index], score) for (index, score) in tfidf_scores]
+    scores = scores.from_records(tuples, columns=['Words', 'Scores'])
+
+    # scores in order
+    scores = scores.sort_values(by=['Scores'], ascending=False)
+    print(scores)
+
+    model = LinearSVC().fit(x_train, y_train)
+    predictions = model.predict(x_test)
+    neural_network.metrics(y_test, predictions)
 
 
 
