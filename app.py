@@ -1,12 +1,14 @@
 from flask import Flask, request, jsonify
-
+from main import NeuralNetwork
 app = Flask(__name__)
 
 
 @app.route("/quizAI", methods=['POST'])
 def quizAI():
     if request.method == 'POST':
-
         quizResults = request.json['answers']
-        print(quizResults)
-        return jsonify({'Success': '200'}, 200)
+
+        neural_network = NeuralNetwork()
+        prediction = neural_network.give_prediction(quizResults)
+
+        return jsonify({'Result': prediction.loc[0, 'Result']}, 200)
