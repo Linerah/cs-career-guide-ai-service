@@ -10,5 +10,5 @@ def quizAI():
 
         neural_network = NeuralNetwork()
         prediction = neural_network.give_prediction(quizResults)
-
-        return jsonify({'Result': prediction.loc[0, 'Result']}, 200)
+        print(prediction)
+        return jsonify({'result': prediction.loc[0, 'Result']})
