@@ -61,10 +61,9 @@ class NeuralNetwork():
 
         return accuracy
 
-    def give_prediction(self, json):
-        df = pd.read_csv('classified_quiz_examples.csv', header=None)
-        df.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8',
-                      'Answer_9', 'Answer_10', 'Result']
+    def give_prediction(self, answer, data):
+        df = pd.read_json(data)
+
         classify = self.classification(df, 'classified')
 
         # Define X and y
@@ -93,7 +92,7 @@ class NeuralNetwork():
         scores = scores.sort_values(by=['Scores'], ascending=False)
         model = LinearSVC().fit(x_train, y_train)
 
-        quiz = pd.DataFrame(json, index=[0])
+        quiz = pd.DataFrame(answer, index=[0])
         unclassified = self.classification(quiz, 'unclassified')
         x_new = tfidf.transform(unclassified['Answer_1'])
         unclassified['Result'] = model.predict(x_new)

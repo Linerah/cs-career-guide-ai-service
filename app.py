@@ -1,3 +1,6 @@
+import json
+
+import pandas as pd
 from flask import Flask, request, jsonify
 from main import NeuralNetwork
 import pymongo
@@ -16,7 +19,6 @@ client = pymongo.MongoClient(
     tlsAllowInvalidCertificates=True)
 db = client['user-auth']
 
-
 """@app.route('/adddata', methods=['GET'])
 @cross_origin()
 def add_data():
@@ -29,13 +31,26 @@ def add_data():
     return jsonify(data)"""
 
 
-@app.route("/quizAI", methods=['POST'])
+@app.route("/quizAI", methods=['POST', 'GET'])
 @cross_origin()
 def quizAI():
     if request.method == 'POST':
         quizResults = request.json['answers']
 
+        projection = {"_id": 0}
+        cursor = db.training.find({}, projection)
+
+        cursorList = list(cursor)
+
+        savedData = json.dumps(cursorList)
         neural_network = NeuralNetwork()
-        prediction = neural_network.give_prediction(quizResults)
+        prediction = neural_network.give_prediction(quizResults, savedData)
         print(prediction)
+
+        db.training.insert_one(prediction.iloc[0].to_dict())
+
+        last_record = db.training.find_one(sort=[("_id", pymongo.DESCENDING)])
+
+        print(last_record)
+
         return jsonify({'result': prediction.loc[0, 'Result']})
