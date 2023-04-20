@@ -1,10 +1,7 @@
 import json
-
-import pandas as pd
 from flask import Flask, request, jsonify
 from main import NeuralNetwork
 import pymongo
-import csv
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
