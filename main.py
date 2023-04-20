@@ -34,16 +34,16 @@ class NeuralNetwork():
             classify = pd.DataFrame({'Answer_1': df['Answer_1'], 'Answer_2': df['Answer_2'], 'Answer_3': df['Answer_3'],
                                      'Answer_4': df['Answer_4'], 'Answer_5': df['Answer_5'], 'Answer_6': df['Answer_6'],
                                      'Answer_7': df['Answer_7'], 'Answer_8': df['Answer_8'], 'Answer_9': df['Answer_9'],
-                                     'Answer_10': df['Answer_10']})
-            classify['Answer_1'] = classify['Answer_1'] + ' ' + classify['Answer_2'] + ' ' + classify['Answer_3'] + ' ' + classify['Answer_4'] + ' ' + classify['Answer_5'] + ' ' + classify['Answer_6'] + ' ' + classify['Answer_7'] + ' ' + classify['Answer_8'] + ' ' + classify['Answer_9'] + ' ' + classify['Answer_10']
+                                     'Answer_10': df['Answer_10'], 'Summary': df['Summary']})
+            classify['Summary'] = classify['Answer_1'] + ' ' + classify['Answer_2'] + ' ' + classify['Answer_3'] + ' ' + classify['Answer_4'] + ' ' + classify['Answer_5'] + ' ' + classify['Answer_6'] + ' ' + classify['Answer_7'] + ' ' + classify['Answer_8'] + ' ' + classify['Answer_9'] + ' ' + classify['Answer_10']
             return classify
 
         elif ctype == 'classified':
             classify = pd.DataFrame({'Answer_1': df['Answer_1'], 'Answer_2': df['Answer_2'], 'Answer_3': df['Answer_3'],
                                      'Answer_4': df['Answer_4'], 'Answer_5': df['Answer_5'], 'Answer_6': df['Answer_6'],
                                      'Answer_7': df['Answer_7'], 'Answer_8': df['Answer_8'], 'Answer_9': df['Answer_9'],
-                                     'Answer_10': df['Answer_10'], 'Result': df['Result']})
-            classify['Answer_1'] = classify['Answer_1'] + ' ' + classify['Answer_2'] + ' ' + classify['Answer_3'] + ' ' + classify['Answer_4'] + ' ' + classify['Answer_5'] + ' ' + classify['Answer_6'] + ' ' + classify['Answer_7'] + ' ' + classify['Answer_8'] + ' ' + classify['Answer_9'] + ' ' + classify['Answer_10']
+                                     'Answer_10': df['Answer_10'], 'Summary': df['Summary'], 'Result': df['Result']})
+            classify['Summary'] = classify['Answer_1'] + ' ' + classify['Answer_2'] + ' ' + classify['Answer_3'] + ' ' + classify['Answer_4'] + ' ' + classify['Answer_5'] + ' ' + classify['Answer_6'] + ' ' + classify['Answer_7'] + ' ' + classify['Answer_8'] + ' ' + classify['Answer_9'] + ' ' + classify['Answer_10']
             return classify
 
     def metrics(self, test_labels, predictions):
@@ -67,7 +67,7 @@ class NeuralNetwork():
         classify = self.classification(df, 'classified')
 
         # Define X and y
-        x = classify['Answer_1'].astype(str)
+        x = classify['Summary'].astype(str)
         y = classify['Result']
 
         # Split data 80% for training 20% for testing.
@@ -94,7 +94,7 @@ class NeuralNetwork():
 
         quiz = pd.DataFrame(answer, index=[0])
         unclassified = self.classification(quiz, 'unclassified')
-        x_new = tfidf.transform(unclassified['Answer_1'])
+        x_new = tfidf.transform(unclassified['Summary'])
         unclassified['Result'] = model.predict(x_new)
         unclassified.dropna()
 
@@ -114,7 +114,8 @@ if __name__ == '__main__':
         "Answer_7": "Reading a book",
         "Answer_8": "Tables",
         "Answer_9": "I agree",
-        "Answer_10": "Coordinate work for others"
+        "Answer_10": "Coordinate work for others",
+        "Summary": "."
     }
     """print("Random synaptic weights: ")
     print(neural_network.synaptic_weights)
@@ -135,12 +136,12 @@ if __name__ == '__main__':
 
     df = pd.read_csv('classified_quiz_examples.csv', header=None)
     df.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8',
-                  'Answer_9', 'Answer_10', 'Result']
+                  'Answer_9', 'Answer_10', 'Summary', 'Result']
     classify = neural_network.classification(df, 'classified')
     print(classify.head())
 
     # Define X and y
-    x = classify['Answer_1'].astype(str)
+    x = classify['Summary'].astype(str)
     y = classify['Result']
 
     # Split data 80% for training 20% for testing.
@@ -171,11 +172,11 @@ if __name__ == '__main__':
     neural_network.metrics(y_test, predictions)
 
     quiz = pd.read_csv('unclassified_quiz_examples.csv', header=None)
-    quiz.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8', 'Answer_9', 'Answer_10']
+    quiz.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8', 'Answer_9', 'Answer_10','Summary']
     unclassified = neural_network.classification(quiz, 'unclassified')
     print(unclassified.head())
 
-    x_new = tfidf.transform(unclassified['Answer_1'])
+    x_new = tfidf.transform(unclassified['Summary'])
     unclassified.shape
     unclassified['Result'] = model.predict(x_new)
     unclassified.dropna()
