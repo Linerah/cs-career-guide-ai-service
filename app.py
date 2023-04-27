@@ -48,12 +48,5 @@ def quizAI():
             savedData = json.dumps(cursorList)
             neural_network = NeuralNetwork()
             prediction = neural_network.give_prediction(quizResults, savedData)
-            print(prediction)
-
-            db.training.insert_one(prediction.iloc[0].to_dict())
-
-            last_record = db.training.find_one(sort=[("_id", pymongo.DESCENDING)])
-
-            print(last_record)
 
             return jsonify({'result': prediction.loc[0, 'Result']})
