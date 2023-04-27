@@ -32,22 +32,28 @@ def add_data():
 @cross_origin()
 def quizAI():
     if request.method == 'POST':
-        quizResults = request.json['answers']
 
-        projection = {"_id": 0}
-        cursor = db.training.find({}, projection)
+        quizResults = request.json['results']['answers']
+        isProfessor = request.json['currentUser']['isProfessor']
 
-        cursorList = list(cursor)
+        if isProfessor:
+            db.training.insert_one(quizResults)
+            return jsonify({'Status': 'OK'})
+        else:
+            projection = {"_id": 0}
+            cursor = db.training.find({}, projection)
 
-        savedData = json.dumps(cursorList)
-        neural_network = NeuralNetwork()
-        prediction = neural_network.give_prediction(quizResults, savedData)
-        print(prediction)
+            cursorList = list(cursor)
 
-        db.training.insert_one(prediction.iloc[0].to_dict())
+            savedData = json.dumps(cursorList)
+            neural_network = NeuralNetwork()
+            prediction = neural_network.give_prediction(quizResults, savedData)
+            print(prediction)
 
-        last_record = db.training.find_one(sort=[("_id", pymongo.DESCENDING)])
+            db.training.insert_one(prediction.iloc[0].to_dict())
 
-        print(last_record)
+            last_record = db.training.find_one(sort=[("_id", pymongo.DESCENDING)])
 
-        return jsonify({'result': prediction.loc[0, 'Result']})
+            print(last_record)
+
+            return jsonify({'result': prediction.loc[0, 'Result']})
