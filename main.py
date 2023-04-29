@@ -134,7 +134,7 @@ if __name__ == '__main__':
     print("Output data: ")
     print(neural_network.think(np.array([A, B, C])))"""
 
-    df = pd.read_csv('classified_quiz_examples.csv', header=None)
+    df = pd.read_csv('classified_quiz_examples1.csv', header=None)
     df.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8',
                   'Answer_9', 'Answer_10', 'Summary', 'Result']
     classify = neural_network.classification(df, 'classified')
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     y = classify['Result']
 
     # Split data 80% for training 20% for testing.
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=False)
 
     tfidf = TfidfVectorizer(smooth_idf=False, sublinear_tf=False, norm=None, analyzer='word', stop_words='english')
     x_train = tfidf.fit_transform(x_train)
