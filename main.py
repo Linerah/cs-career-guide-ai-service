@@ -134,7 +134,7 @@ if __name__ == '__main__':
     print("Output data: ")
     print(neural_network.think(np.array([A, B, C])))"""
 
-    df = pd.read_csv('classified_quiz_examples1.csv', header=None)
+    df = pd.read_csv('classified_quiz_examples.csv', header=None)
     df.columns = ['Answer_1', 'Answer_2', 'Answer_3', 'Answer_4', 'Answer_5', 'Answer_6', 'Answer_7', 'Answer_8',
                   'Answer_9', 'Answer_10', 'Summary', 'Result']
     classify = neural_network.classification(df, 'classified')

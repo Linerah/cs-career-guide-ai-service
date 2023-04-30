@@ -1,3 +1,4 @@
+import csv
 import json
 from flask import Flask, request, jsonify
 from main import NeuralNetwork
@@ -16,11 +17,13 @@ client = pymongo.MongoClient(
     tlsAllowInvalidCertificates=True)
 db = client['user-auth']
 
-"""@app.route('/adddata', methods=['GET'])
+"""
+@app.route('/adddata', methods=['GET'])
 @cross_origin()
+
 def add_data():
     data = []
-    with open('classified_quiz_examples.csv') as file:
+    with open('classified_quiz_examples.csv', encoding="UTF-8") as file:
         filereader = csv.DictReader(file)
         for row in filereader:
             data.append(row)
@@ -46,6 +49,7 @@ def quizAI():
             cursorList = list(cursor)
 
             savedData = json.dumps(cursorList)
+
             neural_network = NeuralNetwork()
             prediction = neural_network.give_prediction(quizResults, savedData)
 
